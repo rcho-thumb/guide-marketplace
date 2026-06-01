@@ -317,25 +317,119 @@ function CommentThread({ comments, onAddComment, currentName, currentRole }) {
 
 // ─── APP ROOT ─────────────────────────────────────────────────────────────────
 
-function App() {
-  const [view, setView]         = useState("landing");
-  const [activePro, setActivePro] = useState(null);
-  const [pros, setPros]         = useState(PROS_SEED);
+const DEFAULT_ADMIN_PASSWORD = "thumbtack2026";
+const ADMIN_PW_KEY = "tt_admin_pw";
+const ADMIN_SESSION_KEY = "tt_admin_auth";
 
-  function loginPro(p) {
-    setActivePro(p);
-    setView("pro");
+function getAdminPassword() {
+  return localStorage.getItem(ADMIN_PW_KEY) || DEFAULT_ADMIN_PASSWORD;
+}
+
+function AdminLoginModal({ onSuccess, onClose }) {
+  const [pw, setPw]         = useState("");
+  const [error, setError]   = useState("");
+  const [changing, setChanging] = useState(false);
+  const [newPw, setNewPw]   = useState("");
+  const [newPw2, setNewPw2] = useState("");
+  const [changed, setChanged] = useState(false);
+
+  function tryLogin() {
+    if (pw === getAdminPassword()) {
+      sessionStorage.setItem(ADMIN_SESSION_KEY, "1");
+      onSuccess();
+    } else {
+      setError("Incorrect password. Try again.");
+    }
   }
+
+  function saveNewPassword() {
+    if (newPw.length < 6) { setError("Password must be at least 6 characters."); return; }
+    if (newPw !== newPw2)  { setError("Passwords don't match."); return; }
+    if (newPw !== pw && pw !== getAdminPassword()) { setError("Current password is incorrect."); return; }
+    localStorage.setItem(ADMIN_PW_KEY, newPw);
+    setChanged(true);
+    setChanging(false);
+    setError("");
+    setPw(newPw);
+  }
+
+  return (
+    <Modal title="Admin sign in" onClose={onClose}>
+      {changed && (
+        <div className="mb-4 rounded-lg px-3 py-2 text-sm font-medium" style={{background:"#D6F1FA", color:"#0079A8"}}>
+          Password updated successfully.
+        </div>
+      )}
+      {!changing ? (
+        <div className="space-y-4">
+          <p className="text-sm" style={{color:"#676D73"}}>This area is for Thumbtack employees only.</p>
+          <Input label="Password" value={pw} onChange={setPw} placeholder="Enter admin password" type="password" />
+          {error && <p className="text-xs font-medium" style={{color:"#CC0000"}}>{error}</p>}
+          <div className="flex gap-3 pt-1">
+            <Btn onClick={tryLogin} disabled={!pw}>Sign in</Btn>
+            <Btn variant="secondary" onClick={onClose}>Cancel</Btn>
+          </div>
+          <button onClick={()=>{setChanging(true);setError("");}}
+            className="text-xs mt-1" style={{color:"#676D73", textDecoration:"underline"}}>
+            Change password
+          </button>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <p className="text-sm" style={{color:"#676D73"}}>Enter your current password and choose a new one.</p>
+          <Input label="Current password" value={pw} onChange={setPw} placeholder="" type="password" />
+          <Input label="New password" value={newPw} onChange={setNewPw} placeholder="At least 6 characters" type="password" />
+          <Input label="Confirm new password" value={newPw2} onChange={setNewPw2} placeholder="" type="password" />
+          {error && <p className="text-xs font-medium" style={{color:"#CC0000"}}>{error}</p>}
+          <div className="flex gap-3 pt-1">
+            <Btn onClick={saveNewPassword}>Update password</Btn>
+            <Btn variant="secondary" onClick={()=>{setChanging(false);setError("");}}>Back</Btn>
+          </div>
+        </div>
+      )}
+    </Modal>
+  );
+}
+
+function App() {
+  const [view, setView]           = useState("landing");
+  const [activePro, setActivePro] = useState(null);
+  const [pros, setPros]           = useState(PROS_SEED);
+  const [showAdminLogin, setShowAdminLogin] = useState(false);
+
+  // Persist admin session within the browser tab
+  const [adminAuthed, setAdminAuthed] = useState(
+    () => sessionStorage.getItem(ADMIN_SESSION_KEY) === "1"
+  );
+
+  function requestAdmin() {
+    if (adminAuthed) { setView("admin"); }
+    else { setShowAdminLogin(true); }
+  }
+
+  function loginPro(p) { setActivePro(p); setView("pro"); }
   function updatePro(updated) {
     setPros(prev=>prev.map(p=>p.id===updated.id?updated:p));
     setActivePro(updated);
   }
 
-  if (view==="landing") return <Landing onAdmin={()=>setView("admin")} onPro={loginPro} pros={pros} />;
-  if (view==="admin")   return <AdminApp onBack={()=>setView("landing")} />;
-  if (view==="pro" && activePro && !activePro.profileComplete)
-    return <ProOnboarding pro={activePro} onSave={updatePro} onBack={()=>setView("landing")} />;
-  if (view==="pro")     return <ProApp pro={activePro} onBack={()=>setView("landing")} onUpdatePro={updatePro} />;
+  return (
+    <>
+      {view==="landing" && <Landing onAdmin={requestAdmin} onPro={loginPro} pros={pros} />}
+      {view==="admin"   && <AdminApp onBack={()=>setView("landing")} onLock={()=>{setAdminAuthed(false);sessionStorage.removeItem(ADMIN_SESSION_KEY);setView("landing");}} />}
+      {view==="pro" && activePro && !activePro.profileComplete &&
+        <ProOnboarding pro={activePro} onSave={updatePro} onBack={()=>setView("landing")} />}
+      {view==="pro" && activePro && activePro.profileComplete &&
+        <ProApp pro={activePro} onBack={()=>setView("landing")} onUpdatePro={updatePro} />}
+
+      {showAdminLogin && (
+        <AdminLoginModal
+          onSuccess={()=>{ setAdminAuthed(true); setShowAdminLogin(false); setView("admin"); }}
+          onClose={()=>setShowAdminLogin(false)}
+        />
+      )}
+    </>
+  );
 }
 
 // ─── LANDING ─────────────────────────────────────────────────────────────────
@@ -568,7 +662,7 @@ function Landing({ onAdmin, onPro, pros }) {
 
 // ─── ADMIN APP ────────────────────────────────────────────────────────────────
 
-function AdminApp({ onBack }) {
+function AdminApp({ onBack, onLock }) {
   const [guides, setGuides] = useState(GUIDES_SEED);
   const [claims, setClaims] = useState(CLAIMS_SEED);
   const [pros]              = useState(PROS_SEED);
@@ -651,8 +745,9 @@ function AdminApp({ onBack }) {
         <button onClick={onBack} className="text-slate-400 hover:text-slate-700 text-sm flex items-center gap-1.5">← Back</button>
         <div className="h-5 w-px bg-slate-200" />
         <span className="font-semibold text-slate-800">Admin Dashboard</span>
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-2">
           <Btn variant="outline" size="sm" onClick={exportCSV}>⬇ Export CSV</Btn>
+          {onLock && <Btn variant="ghost" size="sm" onClick={onLock}>Sign out</Btn>}
         </div>
       </header>
 
