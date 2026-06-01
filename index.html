@@ -3,14 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Guide Marketplace</title>
+  <title>Pro Content Hub — Thumbtack</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     * { box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    :root {
+      --tt-blue: #009FD9;
+      --tt-blue-dark: #007FB0;
+      --tt-black: #2F3033;
+      --tt-gray-dark: #676D73;
+      --tt-gray-300: #E9ECED;
+      --tt-gray-200: #FAFAFA;
+      --tt-green: #2DB783;
+      --tt-purple: #8D56EB;
+      --tt-yellow: #FEBE14;
+    }
     .scrollbar-thin::-webkit-scrollbar { width: 5px; }
     .scrollbar-thin::-webkit-scrollbar-track { background: #f1f5f9; }
     .scrollbar-thin::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
@@ -33,7 +46,7 @@ const US_STATES = ["AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA","HI","ID","
 
 const STATUS_META = {
   available:     { label:"Available",       bg:"bg-emerald-100", text:"text-emerald-700", dot:"bg-emerald-500" },
-  claimed:       { label:"Claimed",         bg:"bg-sky-100",     text:"text-sky-700",     dot:"bg-sky-500" },
+  claimed:       { label:"Claimed",         bg:"bg-[#D6F1FA]",     text:"text-[#0079A8]",     dot:"bg-[#EBF8FD]0" },
   expiring_soon: { label:"Expiring Soon",   bg:"bg-orange-100",  text:"text-orange-700",  dot:"bg-orange-500" },
   expired:       { label:"Expired",         bg:"bg-slate-100",   text:"text-slate-500",   dot:"bg-slate-400" },
   in_progress:   { label:"In Progress",     bg:"bg-violet-100",  text:"text-violet-700",  dot:"bg-violet-500" },
@@ -201,7 +214,7 @@ function Input({ label, value, onChange, placeholder, type="text", required }) {
     <div>
       {label && <label className="block text-xs font-medium text-slate-500 mb-1">{label}{required&&<span className="text-rose-400 ml-0.5">*</span>}</label>}
       <input type={type} value={value} onChange={e=>onChange(e.target.value)} placeholder={placeholder}
-        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent" />
+        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#009FD9] focus:border-transparent" />
     </div>
   );
 }
@@ -211,7 +224,7 @@ function SelectInput({ label, value, onChange, options, placeholder, required })
     <div>
       {label && <label className="block text-xs font-medium text-slate-500 mb-1">{label}{required&&<span className="text-rose-400 ml-0.5">*</span>}</label>}
       <select value={value} onChange={e=>onChange(e.target.value)}
-        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400 bg-white">
+        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#009FD9] bg-white">
         {placeholder && <option value="">{placeholder}</option>}
         {options.map(o => typeof o === "string"
           ? <option key={o} value={o}>{o}</option>
@@ -226,7 +239,7 @@ function Textarea({ label, value, onChange, placeholder, rows=3 }) {
     <div>
       {label && <label className="block text-xs font-medium text-slate-500 mb-1">{label}</label>}
       <textarea rows={rows} value={value} onChange={e=>onChange(e.target.value)} placeholder={placeholder}
-        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400 resize-none" />
+        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#009FD9] resize-none" />
     </div>
   );
 }
@@ -235,7 +248,7 @@ function Btn({ children, onClick, variant="primary", size="md", disabled, classN
   const base = "inline-flex items-center gap-1.5 font-medium rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer";
   const sizes = { sm:"text-xs px-3 py-1.5", md:"text-sm px-4 py-2", lg:"text-sm px-5 py-2.5" };
   const variants = {
-    primary:  "bg-sky-500 hover:bg-sky-600 text-white focus:ring-sky-400",
+    primary:  "bg-[#009FD9] hover:bg-[#007FB0] text-white focus:ring-[#009FD9]",
     secondary:"bg-slate-100 hover:bg-slate-200 text-slate-700 focus:ring-slate-300",
     success:  "bg-teal-500 hover:bg-teal-600 text-white focus:ring-teal-400",
     danger:   "bg-rose-500 hover:bg-rose-600 text-white focus:ring-rose-400",
@@ -278,10 +291,10 @@ function CommentThread({ comments, onAddComment, currentName, currentRole }) {
         {comments.map(c=>(
           <div key={c.id} className={`flex gap-2.5 ${c.role==="admin"?"flex-row-reverse":""}`}>
             <Avatar name={c.author} size="sm" />
-            <div className={`flex-1 rounded-xl px-3 py-2 text-xs ${c.role==="admin"?"bg-slate-100 text-slate-700":"bg-sky-50 text-slate-700"}`}>
+            <div className={`flex-1 rounded-xl px-3 py-2 text-xs ${c.role==="admin"?"bg-slate-100 text-slate-700":"bg-[#EBF8FD] text-slate-700"}`}>
               <div className="flex items-center gap-1.5 mb-0.5">
                 <span className="font-semibold">{c.author}</span>
-                <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${c.role==="admin"?"bg-slate-200 text-slate-600":"bg-sky-100 text-sky-600"}`}>
+                <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${c.role==="admin"?"bg-slate-200 text-slate-600":"bg-[#D6F1FA] text-[#009FD9]"}`}>
                   {c.role==="admin"?"Admin":"Pro"}
                 </span>
                 <span className="text-slate-400 ml-auto">{c.date}</span>
@@ -295,7 +308,7 @@ function CommentThread({ comments, onAddComment, currentName, currentRole }) {
         <input value={text} onChange={e=>setText(e.target.value)}
           onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();submit();}}}
           placeholder="Add a comment…"
-          className="flex-1 border border-slate-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-sky-400" />
+          className="flex-1 border border-slate-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#009FD9]" />
         <Btn size="sm" onClick={submit} disabled={!text.trim()}>Send</Btn>
       </div>
     </div>
@@ -327,53 +340,224 @@ function App() {
 
 // ─── LANDING ─────────────────────────────────────────────────────────────────
 
+function ThumbtackMark({ size = 32 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 32 32" fill="none">
+      <circle cx="16" cy="16" r="16" fill="#009FD9"/>
+      <path d="M13.5 8h5v2.5h-1.75v7.25l2.5 3.25H12.75l2.5-3.25V10.5H13.5V8z" fill="white"/>
+    </svg>
+  );
+}
+
 function Landing({ onAdmin, onPro, pros }) {
   const [showProSelect, setShowProSelect] = useState(false);
+
+  const STEPS = [
+    {
+      num: "01",
+      title: "Pick your guide",
+      body: "Browse 500+ professionally written guides across every home service trade. Find one that fits your specialty and the city you serve.",
+      color: "#009FD9",
+    },
+    {
+      num: "02",
+      title: "Make it yours",
+      body: "Open the template in Google Docs. Add your local pricing, your tips, your voice. It takes an hour — not a month.",
+      color: "#8D56EB",
+    },
+    {
+      num: "03",
+      title: "Get discovered",
+      body: "Submit your finished guide and we'll publish it. Your name, your city, your business — front and center when homeowners are searching.",
+      color: "#2DB783",
+    },
+  ];
+
+  const BENEFITS = [
+    {
+      icon: (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#009FD9" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+        </svg>
+      ),
+      title: "Save hours of writing",
+      body: "Every guide starts as a complete, research-backed template. You focus on the local details — we handle the rest.",
+    },
+    {
+      icon: (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#009FD9" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+        </svg>
+      ),
+      title: "Own your city",
+      body: "Each guide is exclusive to one pro per city. Claim yours before another pro in your market does.",
+    },
+    {
+      icon: (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#009FD9" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+      ),
+      title: "Show up in search",
+      body: "Locally optimized content ranks where your customers are already looking. More visibility, more leads.",
+    },
+  ];
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-sky-900 p-6">
-      <div className="mb-8 text-center">
-        <div className="inline-flex items-center gap-2 bg-sky-500/20 border border-sky-400/30 rounded-full px-4 py-1.5 mb-5">
-          <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse" />
-          <span className="text-sky-300 text-xs font-medium tracking-wide uppercase">Guide Marketplace · Prototype</span>
+    <div className="min-h-screen bg-white" style={{color:"#2F3033"}}>
+
+      {/* ── Nav ── */}
+      <nav className="border-b px-6 sm:px-10 py-4 flex items-center justify-between sticky top-0 bg-white z-40" style={{borderColor:"#E9ECED"}}>
+        <div className="flex items-center gap-2.5">
+          <ThumbtackMark size={30} />
+          <span className="font-semibold text-sm tracking-tight" style={{color:"#2F3033"}}>Pro Content Hub</span>
         </div>
-        <h1 className="text-4xl font-bold text-white mb-3">Content Guide Marketplace</h1>
-        <p className="text-slate-300 max-w-md text-sm leading-relaxed">
-          A scalable workflow where service pros claim expert guide templates,
-          localize them for their city, and submit optimized versions for review.
-        </p>
-      </div>
-      <div className="flex flex-col sm:flex-row gap-4">
         <button onClick={onAdmin}
-          className="flex flex-col items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-2xl px-8 py-6 transition-all w-52">
-          <span className="text-3xl">🛠</span>
-          <span className="font-semibold">Admin Dashboard</span>
-          <span className="text-xs text-slate-400 text-center">Manage guides, reviews & exports</span>
+          className="text-xs font-medium px-3 py-1.5 rounded-lg border transition-colors"
+          style={{borderColor:"#E9ECED", color:"#676D73"}}
+          onMouseOver={e=>{e.currentTarget.style.background="#FAFAFA";}}
+          onMouseOut={e=>{e.currentTarget.style.background="transparent";}}>
+          Admin sign in
         </button>
-        <button onClick={()=>setShowProSelect(true)}
-          className="flex flex-col items-center gap-2 bg-sky-500/80 hover:bg-sky-500 border border-sky-400/40 text-white rounded-2xl px-8 py-6 transition-all w-52">
-          <span className="text-3xl">👷</span>
-          <span className="font-semibold">Pro Portal</span>
-          <span className="text-xs text-sky-200 text-center">Browse, claim & submit guides</span>
-        </button>
+      </nav>
+
+      {/* ── Hero ── */}
+      <section className="max-w-4xl mx-auto px-6 pt-20 pb-16 text-center">
+        <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-7 text-xs font-semibold uppercase tracking-wide"
+          style={{background:"#E9ECED", color:"#009FD9"}}>
+          Now available for pros
+        </div>
+        <h1 className="text-5xl sm:text-6xl font-extrabold leading-tight mb-5" style={{color:"#2F3033", letterSpacing:"-0.02em"}}>
+          Your expertise,<br/>published.
+        </h1>
+        <p className="text-lg leading-relaxed max-w-xl mx-auto mb-10" style={{color:"#676D73"}}>
+          Claim a professionally written guide, add your local knowledge and pricing,
+          and publish content that brings customers straight to you.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <button
+            onClick={()=>setShowProSelect(true)}
+            className="px-7 py-3.5 rounded-xl font-semibold text-white text-sm transition-all"
+            style={{background:"#009FD9"}}
+            onMouseOver={e=>e.currentTarget.style.background="#007FB0"}
+            onMouseOut={e=>e.currentTarget.style.background="#009FD9"}>
+            Browse available guides →
+          </button>
+          <a href="#how-it-works"
+            className="px-7 py-3.5 rounded-xl font-semibold text-sm border transition-all"
+            style={{borderColor:"#E9ECED", color:"#2F3033", textDecoration:"none"}}
+            onMouseOver={e=>e.currentTarget.style.background="#FAFAFA"}
+            onMouseOut={e=>e.currentTarget.style.background="transparent"}>
+            See how it works
+          </a>
+        </div>
+      </section>
+
+      {/* ── Stats strip ── */}
+      <div className="border-y py-6" style={{borderColor:"#E9ECED", background:"#FAFAFA"}}>
+        <div className="max-w-3xl mx-auto px-6 flex flex-col sm:flex-row gap-6 items-center justify-center sm:divide-x" style={{"--tw-divide-opacity":1}}>
+          {[
+            {val:"500+", label:"guides available"},
+            {val:"10",   label:"service categories"},
+            {val:"1",    label:"pro per city, per guide"},
+          ].map((s,i)=>(
+            <div key={i} className="text-center sm:px-10 first:pl-0 last:pr-0">
+              <p className="text-2xl font-extrabold" style={{color:"#009FD9"}}>{s.val}</p>
+              <p className="text-xs mt-0.5" style={{color:"#676D73"}}>{s.label}</p>
+            </div>
+          ))}
+        </div>
       </div>
 
+      {/* ── How it works ── */}
+      <section id="how-it-works" className="py-20 px-6">
+        <div className="max-w-4xl mx-auto">
+          <p className="text-xs font-semibold uppercase tracking-widest mb-3 text-center" style={{color:"#009FD9"}}>How it works</p>
+          <h2 className="text-3xl font-bold text-center mb-14" style={{color:"#2F3033"}}>Three steps to your first guide</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+            {STEPS.map(s=>(
+              <div key={s.num} className="relative">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold mb-5"
+                  style={{background:s.color}}>
+                  {s.num}
+                </div>
+                <h3 className="font-semibold text-base mb-2" style={{color:"#2F3033"}}>{s.title}</h3>
+                <p className="text-sm leading-relaxed" style={{color:"#676D73"}}>{s.body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Benefits ── */}
+      <section className="py-16 px-6" style={{background:"#FAFAFA"}}>
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-2xl font-bold text-center mb-12" style={{color:"#2F3033"}}>Why pros use it</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+            {BENEFITS.map(b=>(
+              <div key={b.title} className="bg-white rounded-2xl p-6 border" style={{borderColor:"#E9ECED"}}>
+                <div className="mb-4 w-10 h-10 rounded-xl flex items-center justify-center" style={{background:"#E9ECED"}}>
+                  {b.icon}
+                </div>
+                <h3 className="font-semibold mb-2 text-sm" style={{color:"#2F3033"}}>{b.title}</h3>
+                <p className="text-sm leading-relaxed" style={{color:"#676D73"}}>{b.body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── CTA banner ── */}
+      <section className="py-20 px-6 text-center">
+        <div className="max-w-xl mx-auto">
+          <h2 className="text-3xl font-bold mb-4" style={{color:"#2F3033"}}>Ready to claim your city?</h2>
+          <p className="text-sm leading-relaxed mb-8" style={{color:"#676D73"}}>
+            Guides go fast — each city can only be claimed once per guide. Sign in now to see what's available in your market.
+          </p>
+          <button
+            onClick={()=>setShowProSelect(true)}
+            className="px-8 py-3.5 rounded-xl font-semibold text-white text-sm transition-all"
+            style={{background:"#009FD9"}}
+            onMouseOver={e=>e.currentTarget.style.background="#007FB0"}
+            onMouseOut={e=>e.currentTarget.style.background="#009FD9"}>
+            Get started — it's free
+          </button>
+        </div>
+      </section>
+
+      {/* ── Footer ── */}
+      <footer className="border-t px-6 py-6 flex items-center justify-between" style={{borderColor:"#E9ECED"}}>
+        <div className="flex items-center gap-2">
+          <ThumbtackMark size={22} />
+          <span className="text-xs" style={{color:"#676D73"}}>© 2026 Thumbtack</span>
+        </div>
+        <button onClick={onAdmin} className="text-xs" style={{color:"#676D73"}}>Admin portal</button>
+      </footer>
+
+      {/* ── Pro select modal ── */}
       {showProSelect && (
-        <Modal title="Sign in as Pro" onClose={()=>setShowProSelect(false)}>
-          <p className="text-sm text-slate-500 mb-4">Select a demo pro account to continue.</p>
+        <Modal title="Sign in to your pro account" onClose={()=>setShowProSelect(false)}>
+          <p className="text-sm mb-4" style={{color:"#676D73"}}>Select a demo account to continue.</p>
           <div className="space-y-2">
             {pros.map(p=>(
               <button key={p.id} onClick={()=>{setShowProSelect(false);onPro(p);}}
-                className="w-full text-left flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:bg-sky-50 hover:border-sky-200 transition-all">
+                className="w-full text-left flex items-center gap-3 p-3 rounded-xl border transition-all"
+                style={{borderColor:"#E9ECED"}}
+                onMouseOver={e=>{e.currentTarget.style.background="#FAFAFA";e.currentTarget.style.borderColor="#009FD9";}}
+                onMouseOut={e=>{e.currentTarget.style.background="transparent";e.currentTarget.style.borderColor="#E9ECED";}}>
                 <Avatar name={p.name||"N"} />
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-slate-800 text-sm">{p.name}</p>
-                  <p className="text-xs text-slate-400 truncate">{p.profileComplete ? `${p.businessName} · ${p.city}, ${p.state}` : "Profile not set up yet"}</p>
+                  <p className="font-medium text-sm" style={{color:"#2F3033"}}>{p.name}</p>
+                  <p className="text-xs truncate" style={{color:"#676D73"}}>{p.profileComplete ? `${p.businessName} · ${p.city}, ${p.state}` : "Profile not set up yet"}</p>
                 </div>
-                {!p.profileComplete && <span className="text-xs bg-amber-100 text-amber-600 px-2 py-0.5 rounded-full flex-shrink-0">New</span>}
+                {!p.profileComplete && (
+                  <span className="text-xs px-2 py-0.5 rounded-full flex-shrink-0 font-medium"
+                    style={{background:"#FFF9E6", color:"#B8860B"}}>New</span>
+                )}
               </button>
             ))}
           </div>
-          <div className="mt-4 pt-4 border-t border-slate-100">
+          <div className="mt-4 pt-4 border-t" style={{borderColor:"#E9ECED"}}>
             <Btn variant="secondary" size="sm" onClick={()=>setShowProSelect(false)}>Cancel</Btn>
           </div>
         </Modal>
@@ -477,7 +661,7 @@ function AdminApp({ onBack }) {
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
           {[
             {label:"Guides",    val:stats.total,     color:"text-slate-700", bg:"bg-white"},
-            {label:"Claimed",   val:stats.claimed,   color:"text-sky-600",   bg:"bg-sky-50"},
+            {label:"Claimed",   val:stats.claimed,   color:"text-[#009FD9]",   bg:"bg-[#EBF8FD]"},
             {label:"In Progress",val:stats.inProg,   color:"text-violet-600",bg:"bg-violet-50"},
             {label:"Submitted", val:stats.submitted, color:"text-amber-600", bg:"bg-amber-50"},
             {label:"Approved",  val:stats.approved,  color:"text-teal-600",  bg:"bg-teal-50"},
@@ -506,7 +690,7 @@ function AdminApp({ onBack }) {
         {tab!=="add" && (
           <input value={search} onChange={e=>setSearch(e.target.value)}
             placeholder={tab==="guides"?"Search by title or keyword…":"Search by guide or pro name…"}
-            className="w-full max-w-sm border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400" />
+            className="w-full max-w-sm border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#009FD9]" />
         )}
 
         {/* GUIDES TAB */}
@@ -587,7 +771,7 @@ function AdminApp({ onBack }) {
                       </td>
                       <td className="px-4 py-3">
                         {c.submittedDocUrl
-                          ? <a href={c.submittedDocUrl} target="_blank" rel="noreferrer" className="text-sky-500 hover:underline text-xs">Open ↗</a>
+                          ? <a href={c.submittedDocUrl} target="_blank" rel="noreferrer" className="text-[#009FD9] hover:underline text-xs">Open ↗</a>
                           : <span className="text-slate-300 text-xs">—</span>}
                       </td>
                       <td className="px-4 py-3">
@@ -724,7 +908,7 @@ function ReviewClaimModal({ claim, onUpdateStatus, onAddComment, onClose }) {
           {claim.submittedDocUrl && (
             <div>
               <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-1">Submitted Doc</p>
-              <a href={claim.submittedDocUrl} target="_blank" rel="noreferrer" className="text-sky-500 hover:underline text-sm break-all">{claim.submittedDocUrl}</a>
+              <a href={claim.submittedDocUrl} target="_blank" rel="noreferrer" className="text-[#009FD9] hover:underline text-sm break-all">{claim.submittedDocUrl}</a>
             </div>
           )}
           <div className="pt-4 border-t border-slate-100">
@@ -756,12 +940,16 @@ function ProOnboarding({ pro, onSave, onBack }) {
   const set = k => v => setF(p=>({...p,[k]:v}));
   const valid = f.name && f.businessName && f.category && f.city && f.state && f.email;
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-sky-900 flex items-center justify-center p-6">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-8 fade-in">
+    <div className="min-h-screen flex items-center justify-center p-6" style={{background:"#FAFAFA"}}>
+      <div className="bg-white rounded-2xl shadow-lg border w-full max-w-lg p-8 fade-in" style={{borderColor:"#E9ECED"}}>
         <div className="mb-6">
-          {onBack && <button onClick={onBack} className="text-slate-400 hover:text-slate-600 text-sm flex items-center gap-1 mb-4">← Back</button>}
-          <h2 className="text-xl font-bold text-slate-800">Set up your profile</h2>
-          <p className="text-sm text-slate-500 mt-1">This info is saved to your account and pre-fills all your future claims.</p>
+          <div className="flex items-center gap-2 mb-5">
+            <ThumbtackMark size={26} />
+            <span className="font-semibold text-sm" style={{color:"#2F3033"}}>Pro Content Hub</span>
+          </div>
+          {onBack && <button onClick={onBack} className="text-sm flex items-center gap-1 mb-4" style={{color:"#676D73"}}>← Back</button>}
+          <h2 className="text-xl font-bold" style={{color:"#2F3033"}}>Set up your profile</h2>
+          <p className="text-sm mt-1" style={{color:"#676D73"}}>Saved once — we'll pre-fill your info on every guide you claim.</p>
         </div>
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
@@ -854,7 +1042,7 @@ function ProApp({ pro, onBack, onUpdatePro }) {
   const TABS = [{id:"library",label:"Guide Library"},{id:"my",label:`My Guides (${myClaims.length})`}];
 
   const statsData = [
-    {label:"Claimed",    val:myClaims.filter(c=>["claimed","expiring_soon"].includes(c.resolvedStatus)).length, color:"text-sky-600",   bg:"bg-sky-50"},
+    {label:"Claimed",    val:myClaims.filter(c=>["claimed","expiring_soon"].includes(c.resolvedStatus)).length, color:"text-[#009FD9]",   bg:"bg-[#EBF8FD]"},
     {label:"In Progress",val:myClaims.filter(c=>c.resolvedStatus==="in_progress").length,                      color:"text-violet-600",bg:"bg-violet-50"},
     {label:"Submitted",  val:myClaims.filter(c=>c.resolvedStatus==="submitted").length,                        color:"text-amber-600", bg:"bg-amber-50"},
     {label:"Approved",   val:myClaims.filter(c=>c.resolvedStatus==="approved").length,                         color:"text-teal-600",  bg:"bg-teal-50"},
@@ -928,7 +1116,7 @@ function ProApp({ pro, onBack, onUpdatePro }) {
           <div className="space-y-4">
             <div className="flex gap-3 flex-wrap">
               <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search guides…"
-                className="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400 w-60" />
+                className="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#009FD9] w-60" />
               <SelectInput value={filterCat} onChange={setFilterCat} options={CATEGORIES} placeholder="All categories" />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -1114,7 +1302,7 @@ function GuidePreviewModal({ guide, onClaim, onClose, alreadyClaimed }) {
           <div className="space-y-2">
             {outline.map((item,i)=>(
               <div key={i} className="flex items-center gap-3 p-2.5 rounded-lg bg-slate-50">
-                <span className="w-6 h-6 rounded-full bg-sky-100 text-sky-600 text-xs flex items-center justify-center font-semibold flex-shrink-0">{i+1}</span>
+                <span className="w-6 h-6 rounded-full bg-[#D6F1FA] text-[#009FD9] text-xs flex items-center justify-center font-semibold flex-shrink-0">{i+1}</span>
                 <span className="text-sm text-slate-700">{item}</span>
               </div>
             ))}
@@ -1122,9 +1310,9 @@ function GuidePreviewModal({ guide, onClaim, onClose, alreadyClaimed }) {
         </div>
 
         {guide.notes && (
-          <div className="bg-sky-50 border border-sky-100 rounded-xl px-4 py-3">
-            <p className="text-xs font-semibold text-sky-700 mb-1">📌 Note from Admin</p>
-            <p className="text-sm text-sky-700">{guide.notes}</p>
+          <div className="bg-[#EBF8FD] border border-[#B8E6F7] rounded-xl px-4 py-3">
+            <p className="text-xs font-semibold text-[#0079A8] mb-1">📌 Note from Admin</p>
+            <p className="text-sm text-[#0079A8]">{guide.notes}</p>
           </div>
         )}
 
@@ -1167,7 +1355,7 @@ function ClaimModal({ guide, pro, existingClaims, onClaim, onWaitlist, onClose }
           <p className="text-xs text-slate-400 mt-1">{guide.category} · {guide.keyword}</p>
         </div>
 
-        <div className="bg-sky-50 border border-sky-100 rounded-xl px-4 py-3 text-xs text-sky-700">
+        <div className="bg-[#EBF8FD] border border-[#B8E6F7] rounded-xl px-4 py-3 text-xs text-[#0079A8]">
           <strong>How it works:</strong> Claim this guide for your city, localize it, and submit your revised Google Doc. You have {CLAIM_EXPIRY_DAYS} days to start editing before the claim expires.
         </div>
 
@@ -1194,7 +1382,7 @@ function ClaimModal({ guide, pro, existingClaims, onClaim, onWaitlist, onClose }
         )}
 
         {guide.notes && (
-          <div className="bg-sky-50 border border-sky-100 rounded-lg px-3 py-2 text-xs text-sky-700">
+          <div className="bg-[#EBF8FD] border border-[#B8E6F7] rounded-lg px-3 py-2 text-xs text-[#0079A8]">
             <strong>Admin note:</strong> {guide.notes}
           </div>
         )}
