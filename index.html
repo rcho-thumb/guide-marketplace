@@ -334,6 +334,10 @@ function CommentThread({ comments, onAddComment, currentName, currentRole }) {
 // ─── APP ROOT ─────────────────────────────────────────────────────────────────
 
 const DEFAULT_ADMIN_PASSWORD = "thumbtack2026";
+const DEFAULT_PRO_PASSWORD   = "pro2026";
+const PRO_PW_PREFIX = "tt_pro_pw_";
+function getProPassword(id) { return localStorage.getItem(PRO_PW_PREFIX + id) || DEFAULT_PRO_PASSWORD; }
+function setProPassword(id, pw) { localStorage.setItem(PRO_PW_PREFIX + id, pw); }
 const ADMIN_PW_KEY = "tt_admin_pw";
 const ADMIN_SESSION_KEY = "tt_admin_auth";
 
@@ -457,9 +461,10 @@ function ThumbtackMark({ size = 32 }) {
 }
 
 function ProSignupForm({ onSubmit, onBack }) {
-  const [f, setF] = useState({ name:"", businessName:"", category:"", city:"", state:"", website:"", email:"" });
+  const [f, setF] = useState({ name:"", businessName:"", category:"", city:"", state:"", website:"", email:"", password:"", password2:"" });
   const set = k => v => setF(p=>({...p,[k]:v}));
-  const valid = f.name && f.businessName && f.category && f.city && f.state && f.email;
+  const pwMatch = f.password && f.password === f.password2;
+  const valid = f.name && f.businessName && f.category && f.city && f.state && f.email && f.password.length >= 6 && pwMatch;
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3">
@@ -473,8 +478,18 @@ function ProSignupForm({ onSubmit, onBack }) {
       </div>
       <Input label="Email" value={f.email} onChange={set("email")} placeholder="you@example.com" type="email" required />
       <Input label="Website / Thumbtack Profile URL" value={f.website} onChange={set("website")} placeholder="https://thumbtack.com/…" />
+      <div className="grid grid-cols-2 gap-3">
+        <Input label="Password" value={f.password} onChange={set("password")} placeholder="At least 6 characters" type="password" required />
+        <Input label="Confirm Password" value={f.password2} onChange={set("password2")} placeholder="Re-enter password" type="password" required />
+      </div>
+      {f.password2 && !pwMatch && <p className="text-xs" style={{color:"#CC0000"}}>Passwords don't match.</p>}
       <div className="flex gap-3 pt-1">
-        <Btn disabled={!valid} onClick={()=>onSubmit({...f, id:"p"+uid(), profileComplete:true})}>Create account</Btn>
+        <Btn disabled={!valid} onClick={()=>{
+          const id = "p"+uid();
+          setProPassword(id, f.password);
+          const {password, password2, ...rest} = f;
+          onSubmit({...rest, id, profileComplete:true});
+        }}>Create account</Btn>
         <Btn variant="secondary" onClick={onBack}>Back</Btn>
       </div>
     </div>
@@ -483,7 +498,21 @@ function ProSignupForm({ onSubmit, onBack }) {
 
 function Landing({ onAdmin, onPro, onProSignup, pros }) {
   const [showProSelect, setShowProSelect] = useState(false);
-  const [proMode, setProMode] = useState("signin"); // "signin" | "signup"
+  const [proMode, setProMode]   = useState("signin"); // "signin" | "signup"
+  const [selectedPro, setSelectedPro] = useState(null); // pro selected, awaiting password
+  const [pw, setPw]             = useState("");
+  const [pwError, setPwError]   = useState("");
+
+  function handleProSelect(p) { setSelectedPro(p); setPw(""); setPwError(""); }
+  function handleProLogin() {
+    if (pw === getProPassword(selectedPro.id)) {
+      setShowProSelect(false); setSelectedPro(null); setPw(""); setPwError("");
+      onPro(selectedPro);
+    } else {
+      setPwError("Incorrect password. Try again.");
+    }
+  }
+  function closeModal() { setShowProSelect(false); setSelectedPro(null); setPw(""); setPwError(""); }
 
   const STEPS = [
     {
@@ -676,13 +705,15 @@ function Landing({ onAdmin, onPro, onProSignup, pros }) {
 
       {/* ── Pro select modal ── */}
       {showProSelect && (
-        <Modal title={proMode==="signin" ? "Sign in to your account" : "Create your pro account"} onClose={()=>setShowProSelect(false)}>
-          {proMode==="signin" ? (
+        <Modal
+          title={proMode==="signup" ? "Create your pro account" : selectedPro ? `Welcome back, ${selectedPro.name.split(" ")[0]}` : "Sign in to your account"}
+          onClose={closeModal}>
+          {proMode==="signin" && !selectedPro && (
             <>
-              <p className="text-sm mb-4" style={{color:"#676D73"}}>Select your account to continue.</p>
+              <p className="text-sm mb-4" style={{color:"#676D73"}}>Select your name to continue.</p>
               <div className="space-y-2 max-h-72 overflow-y-auto scrollbar-thin">
                 {pros.map(p=>(
-                  <button key={p.id} onClick={()=>{setShowProSelect(false);onPro(p);}}
+                  <button key={p.id} onClick={()=>handleProSelect(p)}
                     className="w-full text-left flex items-center gap-3 p-3 rounded-xl border transition-all"
                     style={{borderColor:"#E9ECED"}}
                     onMouseOver={e=>{e.currentTarget.style.background="#FAFAFA";e.currentTarget.style.borderColor="#009FD9";}}
@@ -692,6 +723,7 @@ function Landing({ onAdmin, onPro, onProSignup, pros }) {
                       <p className="font-medium text-sm" style={{color:"#2F3033"}}>{p.name}</p>
                       <p className="text-xs truncate" style={{color:"#676D73"}}>{p.businessName} · {p.city}, {p.state}</p>
                     </div>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D3D4D5" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
                   </button>
                 ))}
               </div>
@@ -700,13 +732,34 @@ function Landing({ onAdmin, onPro, onProSignup, pros }) {
                   New to the program?{" "}
                   <button onClick={()=>setProMode("signup")} className="font-semibold" style={{color:"#009FD9"}}>Sign up</button>
                 </span>
-                <Btn variant="secondary" size="sm" onClick={()=>setShowProSelect(false)}>Cancel</Btn>
+                <Btn variant="secondary" size="sm" onClick={closeModal}>Cancel</Btn>
               </div>
             </>
-          ) : (
+          )}
+
+          {proMode==="signin" && selectedPro && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 p-3 rounded-xl" style={{background:"#FAFAFA", border:"1px solid #E9ECED"}}>
+                <Avatar name={selectedPro.name} />
+                <div>
+                  <p className="font-medium text-sm" style={{color:"#2F3033"}}>{selectedPro.name}</p>
+                  <p className="text-xs" style={{color:"#676D73"}}>{selectedPro.businessName} · {selectedPro.city}, {selectedPro.state}</p>
+                </div>
+              </div>
+              <Input label="Password" value={pw} onChange={v=>{setPw(v);setPwError("");}} placeholder="Enter your password" type="password" />
+              {pwError && <p className="text-xs font-medium" style={{color:"#CC0000"}}>{pwError}</p>}
+              <p className="text-xs" style={{color:"#676D73"}}>Demo accounts use the default password: <span className="font-mono font-semibold">pro2026</span></p>
+              <div className="flex gap-3 pt-1">
+                <Btn onClick={handleProLogin} disabled={!pw}>Sign in</Btn>
+                <Btn variant="secondary" onClick={()=>{ setSelectedPro(null); setPw(""); setPwError(""); }}>← Back</Btn>
+              </div>
+            </div>
+          )}
+
+          {proMode==="signup" && (
             <>
               <p className="text-sm mb-4" style={{color:"#676D73"}}>Fill in your details to get started — takes about 2 minutes.</p>
-              <ProSignupForm onSubmit={(newPro)=>{setShowProSelect(false);onProSignup(newPro);}} onBack={()=>setProMode("signin")} />
+              <ProSignupForm onSubmit={(newPro)=>{ closeModal(); onProSignup(newPro); }} onBack={()=>setProMode("signin")} />
             </>
           )}
         </Modal>
